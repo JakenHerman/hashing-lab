@@ -7,23 +7,19 @@ public class HashFunction {
     int itemsInArray = 0;
 
     public static void main(String[] args){
-        HashFunction func = new HashFunction(200); // 3 spaces
+        HashFunction func = new HashFunction(210); // 21 spaces
         
         try {
             BufferedReader in = new BufferedReader(new FileReader("Words200D16.txt"));
-
             String str;
-
             List<String> list = new ArrayList<String>();
             while((str = in.readLine()) != null){
                 list.add(str);
             }
-
-            String[] stringArr = list.toArray(new String[0]);
+            String[] stringArr = list.toArray(new String[200]);
             func.hashAddress(stringArr, func.array);
+            func.display();
         } catch (Exception er) { System.out.println(er);}
-
-        func.display();
     }
 
     public String findKey(String key){
@@ -46,8 +42,8 @@ public class HashFunction {
 
 		for(int i = 0; i < stringsForArray.length; i++){
 			String newElementValue = stringsForArray[i];
-			char secondCharacter = newElementValue.charAt(1);
-			char fifteenthCharacter = newElementValue.charAt(14);
+			long secondCharacter = Character.getNumericValue(newElementValue.charAt(1));
+			long fifteenthCharacter = Character.getNumericValue(newElementValue.charAt(14));
 			long twelveAndThirteen = stringToLongConverter(newElementValue);
 
 			long product = (twelveAndThirteen) * 10;
@@ -99,24 +95,24 @@ public class HashFunction {
 
 		int increment = 0;
 
-		for (int m = 0; m < 3; m++) {
+		for (int m = 0; m < 21; m++) {
 
 			increment += 10;
 
-			for (int n = 0; n < 71; n++)
+			for (int n = 0; n < 111; n++)
 				System.out.print("-");
 
 			System.out.println();
 
 			for (int n = increment - 10; n < increment; n++) {
 
-				System.out.format("| %3s " + " ", n);
+				System.out.format("| %6s " + " ", n);
 
 			}
 
 			System.out.println("|");
 
-			for (int n = 0; n < 71; n++)
+			for (int n = 0; n < 111; n++)
 				System.out.print("-");
 
 			System.out.println();
@@ -128,13 +124,13 @@ public class HashFunction {
 
 				else
 					System.out
-							.print(String.format("| %3s " + " ", array[n]));
+							.print(String.format("| %6s " + " ", array[n]));
 
 			}
 
 			System.out.println("|");
 
-			for (int n = 0; n < 71; n++)
+			for (int n = 0; n < 111; n++)
 				System.out.print("-");
 
 			System.out.println();
