@@ -1,144 +1,301 @@
-import java.util.*;
+import java.util.Scanner;
 import java.io.*;
 
-public class HashFunction {
-    String[] array;
+public class HashFunction2 {
+    
+    String[] theArray;
+    int[] probesArray = new int[200];
     int arraySize;
     int itemsInArray = 0;
-
-    public static void main(String[] args){
-        HashFunction func = new HashFunction(200); // 3 spaces
+    
+    public static String[] elementsToAdd = new String[200];
+    
+    public static void main(String[] args) {
+        
+        Scanner input = new Scanner(System.in);
         
         try {
-            BufferedReader in = new BufferedReader(new FileReader("Words200D16.txt"));
-
-            String str;
-
-            List<String> list = new ArrayList<String>();
-            while((str = in.readLine()) != null){
-                list.add(str);
+            File file = new File("Words200D16.txt");
+            Scanner scanner = new Scanner(file);
+            
+            while(scanner.hasNextLine()){
+                for(int i = 0; i < 200; i++){
+                    String line = scanner.nextLine();
+                    elementsToAdd[i] = line;
+                }
             }
-
-            String[] stringArr = list.toArray(new String[0]);
-            func.hashAddress(stringArr, func.array);
-        } catch (Exception er) { System.out.println(er);}
-
-        func.display();
-    }
-
-    public String findKey(String key){
-
-        int arrayIndexHash = Integer.parseInt(key) % 29;
-
-        while(array[arrayIndexHash] != "-1"){
-            if (array[arrayIndexHash] == key){
-                System.out.println(key + " was found at index " + arrayIndexHash);
-                return array[arrayIndexHash];
-            }
-
-            ++arrayIndexHash;
-            arrayIndexHash %= arraySize;
+            
+        } catch(Exception er) {
+            System.out.println("Error: " + er);
         }
-        return null;
-    }
-
-    public void hashAddress(String[] stringsForArray, String[] array){
-
-		for(int i = 0; i < stringsForArray.length; i++){
-			String newElementValue = stringsForArray[i];
-			char secondCharacter = newElementValue.charAt(1);
-			char fifteenthCharacter = newElementValue.charAt(14);
-			long twelveAndThirteen = stringToLongConverter(newElementValue);
-
-			long product = (twelveAndThirteen) * 10;
-			long address = (secondCharacter + fifteenthCharacter + twelveAndThirteen) % 128;
-			System.out.println("Modulus Index = " + address + " for value " + newElementValue);
-
-			while(array[(int)address] != "-1"){
-
-				++address;
-				System.out.println("Collision. Trying " + address + " instead");
-
-				address %= arraySize;
-			}
-			array[(int)address] = newElementValue;
-		}
-
-	}
-/*
-    public void modHash(String[] stringsForArray, String[] array){
-        for(int i = 0; i < stringsForArray.length; i++){
-            String newElementVal = stringsForArray[i];
-            int arrayIndex = Integer.parseInt(newElementVal) % 29;
-
-            System.out.println("Modulus Index = " + arrayIndex + " for value " + newElementVal);
-
-            while(array[arrayIndex] != "-1"){
-
-                ++arrayIndex;
-                System.out.println("Collision. Trying " + arrayIndex + " instead");
-
-                arrayIndex %= arraySize;
-            }
-            array[arrayIndex] = newElementVal;
-        }
-    }
-*/
-    public long stringToLongConverter(String str){
-		long newLong = Long.parseLong(str.substring(11, 13));
-		return newLong;
-	}
-
-    HashFunction(int size){
-        arraySize = size;
-        array = new String[size];
-        Arrays.fill(array, "-1");
+        
+        HashFunction2 halfHashTable = new HashFunction2(200, "half", "linear");
+        HashFunction2 eightyFiveHashTable = new HashFunction2(200, "85", "linear");
+        HashFunction2 halfFullRandom = new HashFunction2(200, "half", "random");
+        HashFunction2 eightFiveHashRand = new HashFunction2(200, "85", "random");
+        
+        // Display every item in the array with
+        // the index they are associated with
+        
+        halfHashTable.displayTheArray(); // C Option Part A
+        eightyFiveHashTable.displayTheArray(); // C Option Part B
+        
     }
     
-    public void display() {
-
-		int increment = 0;
-
-		for (int m = 0; m < 3; m++) {
-
-			increment += 10;
-
-			for (int n = 0; n < 71; n++)
-				System.out.print("-");
-
-			System.out.println();
-
-			for (int n = increment - 10; n < increment; n++) {
-
-				System.out.format("| %3s " + " ", n);
-
-			}
-
-			System.out.println("|");
-
-			for (int n = 0; n < 71; n++)
-				System.out.print("-");
-
-			System.out.println();
-
-			for (int n = increment - 10; n < increment; n++) {
-
-				if (array[n].equals("-1"))
-					System.out.print("|      ");
-
-				else
-					System.out
-							.print(String.format("| %3s " + " ", array[n]));
-
-			}
-
-			System.out.println("|");
-
-			for (int n = 0; n < 71; n++)
-				System.out.print("-");
-
-			System.out.println();
-
-		}
+    public int stringHashFunction(String wordToHash) {
+        
+        int hashKeyValue = 0;
+        
+        int secondChar = wordToHash.charAt(1);
+        int fifChar = wordToHash.charAt(14);
+        int tweChar = wordToHash.charAt(11);
+        int thiChar = wordToHash.charAt(12);
+        
+        hashKeyValue = (secondChar + fifChar + (tweChar * thiChar)) % 128;
+        return hashKeyValue;
+        
     }
+    
+    HashFunction2(int size, String method, String type) {
+        
+        arraySize = size;
+        
+        theArray = new String[size];
+        
+        // Fill the array with empty Strings
+        
+        for (int i = 0; i < 200; i++) {
+            
+            theArray[i] = "                    ";
+            
+        }
+        
+        if(method.equalsIgnoreCase("half")){
+            if(type.equalsIgnoreCase("linear")){
+                halfFull(elementsToAdd, "linear");
+            }
+            else{
+                halfFull(elementsToAdd, "random");
+            }
+        }
+        else if(method.equalsIgnoreCase("85")){
+            if(type.equalsIgnoreCase("linear")){
+                eightyFivePercentFull(elementsToAdd, "linear");
+            }
+            else {
+                eightyFivePercentFull(elementsToAdd, "random");
+            }
+        }
+        else{
+            if(type.equalsIgnoreCase("linear")){
+                addTheArray(elementsToAdd, "linear");
+            }
+            else{
+                addTheArray(elementsToAdd, "random");
+            }
+        }
+        
+        
+    }
+    
+    public void insertLinear(String newWord) {
+        
+        String wordToHash = ensure16(newWord);
+        int numberOfProbes = 0;
+        
+        // Calculate the hashkey for the Word
+        
+        int hashKey = stringHashFunction(wordToHash);
+        // Add the new word to the array and set
+        // the key for the word
+        
+        while(!theArray[hashKey].equals("                    ")){
+            if(hashKey > 199){
+                hashKey = 1;
+            }
+            int r = 1;
+            hashKey = generateRandom(r);
+            numberOfProbes += 1;
+        }
+        
+        theArray[hashKey] = wordToHash;
+        probesArray[hashKey] = numberOfProbes;
+    }
+    
+    public int generateRandom(int r){
+        r = r * 5;
+        r = r % (2^(202));
+        r = r / 4;
+        return r;
+    }
+    
+    public void insertRandom(String newWord) {
+        
+        String wordToHash = ensure16(newWord);
+        int numberOfProbes = 0;
+        
+        // Calculate the hashkey for the Word
+        
+        int hashKey = stringHashFunction(wordToHash);
+        // Add the new word to the array and set
+        // the key for the word
+        
+        while(!theArray[hashKey].equals("                    ")){
+            if(hashKey > 199){
+                hashKey = 0;
+            }
+            hashKey += 1;
+            numberOfProbes += 1;
+        }
+        
+        theArray[hashKey] = wordToHash;
+        probesArray[hashKey] = numberOfProbes;
+    }
+    
+    public String ensure16(String newWord){
+        if (newWord.length() < 20){
+            int remainder = 20 - newWord.length();
+            for(int i = 0; i < remainder; i++){
+                newWord += " ";
+            }
+        }
+        else {
+            newWord = newWord;
+        }
+        return newWord;
+    }
+    
+    
+    public void addTheArray(String[] elementsToAdd, String method) {
+        
+        for (int i = 0; i < elementsToAdd.length; i++) {
+            
+            String newWord = elementsToAdd[i];
+            // Add the Word to theArray
+            if(method.equalsIgnoreCase("linear")){
+                insertLinear(newWord);
+            } else {
+                insertRandom(newWord);
+            }
+            
+            
+        }
+        
+    }
+    
+    public void halfFull(String[] elementsToAdd, String method) {
+        for (int i = 0; i < 100; i++) {
+            String newWord = elementsToAdd[i];
+            // Add the Word to theArray
+            if(method.equalsIgnoreCase("linear")){
+                insertLinear(newWord);
+            } else {
+                insertRandom(newWord);
+            }
+        }
+    }
+    
+    public void eightyFivePercentFull(String[] elementsToAdd, String method){
+        for (int j = 0; j < 170; j++){
+            String newWord = elementsToAdd[j];
+            //Add the word to theArray
+            if(method.equalsIgnoreCase("linear")){
+                insertLinear(newWord);
+            } else {
+                insertRandom(newWord);
+            }
+        }
+    }
+    
+    public void displayTheArray() {
+        
+        for (int i = 0; i < 7; i +=3){
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("|         " + i + "            |         " + (i + 1) +  "           |       " + (i + 2) +  "            |");
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
+        }
+       
+        for(int i = 10; i < 97; i+=3){
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("|        " + i + "            |         " + (i + 1) +  "          |       " + (i + 2) +  "            |");
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
+         }
+        
+        
+       for (int i = 100; i < 197; i+=3) {
+        
+           System.out.println("--------------------------------------------------------------------");
+           System.out.println("|        " + i + "           |        " + (i + 1) +  "          |       " + (i + 2) +  "           |");
+           System.out.println("--------------------------------------------------------------------");
+           System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
+       }
+        
+        System.out.println("First 30 entries Stats:");
+        displayArrayStats(probesArray, 0, 29);
+        System.out.println("");
+        System.out.println("Last 30 entries Stats:");
+        displayArrayStats(probesArray, 169, 199);
+        System.out.println("");
+        
+        double linearTheoreticalNumOfProbes = calculateTheoreticalNum(30, 200);
+        
+        System.out.println("Theoretical expected number of probes using linear probing: " + linearTheoreticalNumOfProbes);
+        
+        System.out.println("This value differs from our empirical value because the theoretical value \n" +
+                           "assumes the hashing function is perfect, which ours is not.\n The theoretical " +
+                           "value assumes a very low value of collisions,\n where our hash function contains" +
+                           " many.");
+    }
+    
+    public double avgNumberProbes(int[] probesArray, int startEntry, int FinalEntry){
+        int sum = 0;
+        int ofHowManyRecords = FinalEntry - startEntry;
+        for(int d=0; d <= ofHowManyRecords; d++) {
+            sum = sum + probesArray[startEntry + d];
+        }
+        
+        double average = 1.0d * sum / ofHowManyRecords;
+        return average;
+        
+    }
+    
+    public void displayArrayStats(int[] probesArray, int min, int max){
+        System.out.println("Average number of Probes: " + avgNumberProbes(probesArray, min, max));
+        System.out.println("Minimum number of Probes: " + minProbes(probesArray, min, max));
+        System.out.println("Maximum number of Probes: " + maxProbes(probesArray, min, max));
+            
+    }
+    
+    public double calculateTheoreticalNum(double keys, double tableSize){
+        double loadFactor = (keys / tableSize);
+        double theoreticalNumOfProbes = ((1 - loadFactor)/2)/(1 - loadFactor);
+        return theoreticalNumOfProbes;
+    }
+    
+    public int minProbes(int[] array, int startEntry, int FinalEntry){
+        int minValue = array[startEntry];
+        int d = FinalEntry - startEntry;
+        for(int i=0;i <= d; i++){
+            if(array[startEntry + i] < minValue){
+                minValue = array[startEntry + i];
+            }
+        }
+        return minValue;
+    }
+    
+    public static int maxProbes(int[] array, int startEntry, int FinalEntry){
+        int maxValue = array[startEntry];
+        int d = FinalEntry - startEntry;
+        for(int i=0; i <= d; i++){
+            if(array[startEntry + i] > maxValue){
+                maxValue = array[startEntry + i];
+                
+            }
+        }
+        return maxValue;  
+    }
+    
+    
 }
