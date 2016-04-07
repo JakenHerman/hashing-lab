@@ -15,7 +15,7 @@ public class HashFunction2 {
         Scanner input = new Scanner(System.in);
         
         try {
-            File file = new File("Words200D16.txt");
+            File file = new File("Word200D16.txt");
             Scanner scanner = new Scanner(file);
             
             while(scanner.hasNextLine()){
@@ -37,9 +37,10 @@ public class HashFunction2 {
         // Display every item in the array with
         // the index they are associated with
         
-        halfHashTable.displayTheArray(); // C Option Part A
-        eightyFiveHashTable.displayTheArray(); // C Option Part B
-        
+        halfHashTable.displayTheArray("linear"); // C Option Part A
+        eightyFiveHashTable.displayTheArray("linear"); // C Option Part B
+        halfFullRandom.displayTheArray("random"); // C Option Part C
+        eightFiveHashRand.displayTheArray("random"); // C Option Part C
     }
     
     public int stringHashFunction(String wordToHash) {
@@ -98,10 +99,11 @@ public class HashFunction2 {
         
     }
     
-    public void insertLinear(String newWord) {
+    public void insertRandom(String newWord) {
         
         String wordToHash = ensure16(newWord);
         int numberOfProbes = 0;
+        int r = 1;
         
         // Calculate the hashkey for the Word
         
@@ -110,11 +112,7 @@ public class HashFunction2 {
         // the key for the word
         
         while(!theArray[hashKey].equals("                    ")){
-            if(hashKey > 199){
-                hashKey = 1;
-            }
-            int r = 1;
-            hashKey = generateRandom(r);
+            hashKey = generateRandom(r) + numberOfProbes;
             numberOfProbes += 1;
         }
         
@@ -123,13 +121,18 @@ public class HashFunction2 {
     }
     
     public int generateRandom(int r){
-        r = r * 5;
-        r = r % (2^(202));
-        r = r / 4;
+        int q = 0;
+        int p = 0;
+        while (p != 1){
+            r = r * 5;
+            r = r % (2^200);
+            q = r / 4;
+            p = r;
+        }
         return r;
     }
     
-    public void insertRandom(String newWord) {
+    public void insertLinear(String newWord) {
         
         String wordToHash = ensure16(newWord);
         int numberOfProbes = 0;
@@ -207,7 +210,7 @@ public class HashFunction2 {
         }
     }
     
-    public void displayTheArray() {
+    public void displayTheArray(String type) {
         
         for (int i = 0; i < 7; i +=3){
             System.out.println("--------------------------------------------------------------------");
@@ -215,22 +218,22 @@ public class HashFunction2 {
             System.out.println("--------------------------------------------------------------------");
             System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
         }
-       
+        
         for(int i = 10; i < 97; i+=3){
             System.out.println("--------------------------------------------------------------------");
             System.out.println("|        " + i + "            |         " + (i + 1) +  "          |       " + (i + 2) +  "            |");
             System.out.println("--------------------------------------------------------------------");
             System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
-         }
+        }
         
         
-       for (int i = 100; i < 197; i+=3) {
-        
-           System.out.println("--------------------------------------------------------------------");
-           System.out.println("|        " + i + "           |        " + (i + 1) +  "          |       " + (i + 2) +  "           |");
-           System.out.println("--------------------------------------------------------------------");
-           System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
-       }
+        for (int i = 100; i < 197; i+=3) {
+            
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("|        " + i + "           |        " + (i + 1) +  "          |       " + (i + 2) +  "           |");
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("| " + theArray[i] + probesArray[i] + "|" + theArray[i+1] + probesArray[i + 1] + "|" + theArray[i+2]+ probesArray[i + 2] + "|");
+        }
         
         System.out.println("First 30 entries Stats:");
         displayArrayStats(probesArray, 0, 29);
@@ -239,7 +242,8 @@ public class HashFunction2 {
         displayArrayStats(probesArray, 169, 199);
         System.out.println("");
         
-        double linearTheoreticalNumOfProbes = calculateTheoreticalNum(30, 200);
+        if(type.equalsIgnoreCase("linear")){
+        double linearTheoreticalNumOfProbes = calculateTheoreticalNum(30, 200, "linear");
         
         System.out.println("Theoretical expected number of probes using linear probing: " + linearTheoreticalNumOfProbes);
         
@@ -247,7 +251,18 @@ public class HashFunction2 {
                            "assumes the hashing function is perfect, which ours is not.\n The theoretical " +
                            "value assumes a very low value of collisions,\n where our hash function contains" +
                            " many.");
+        }
+        else {
+            double theoreticalNumOfProbes = calculateTheoreticalNum(30, 200, "random");
+            
+            System.out.println("Theoretical expected number of probes using random probing: " + theoreticalNumOfProbes);
+            System.out.println("This value differs from our empirical value because the theoretical value \n" +
+                               "assumes the hashing function is perfect, which ours is not.\n The theoretical " +
+                               "value assumes a very low value of collisions,\n where our hash function contains" +
+                               " many.");
+        }
     }
+        
     
     public double avgNumberProbes(int[] probesArray, int startEntry, int FinalEntry){
         int sum = 0;
@@ -265,13 +280,20 @@ public class HashFunction2 {
         System.out.println("Average number of Probes: " + avgNumberProbes(probesArray, min, max));
         System.out.println("Minimum number of Probes: " + minProbes(probesArray, min, max));
         System.out.println("Maximum number of Probes: " + maxProbes(probesArray, min, max));
-            
+        
     }
     
-    public double calculateTheoreticalNum(double keys, double tableSize){
-        double loadFactor = (keys / tableSize);
-        double theoreticalNumOfProbes = ((1 - loadFactor)/2)/(1 - loadFactor);
-        return theoreticalNumOfProbes;
+    public double calculateTheoreticalNum(double keys, double tableSize, String type){
+        if(type.equalsIgnoreCase("linear")){
+            double loadFactor = (keys / tableSize);
+            double theoreticalNumOfProbes = ((1 - loadFactor)/2)/(1 - loadFactor);
+            return theoreticalNumOfProbes;
+        }
+        else{
+            double loadFactor = (keys / tableSize);
+            double theoreticalNumOfProbes = -(1 / loadFactor)*Math.log(1 - loadFactor);
+            return theoreticalNumOfProbes;
+        }
     }
     
     public int minProbes(int[] array, int startEntry, int FinalEntry){
@@ -294,7 +316,7 @@ public class HashFunction2 {
                 
             }
         }
-        return maxValue;  
+        return maxValue;
     }
     
     
