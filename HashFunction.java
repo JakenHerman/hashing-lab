@@ -37,22 +37,29 @@ public class HashFunction2 {
         // Display every item in the array with
         // the index they are associated with
         
-        halfHashTable.displayTheArray("linear"); // C Option Part A
-        eightyFiveHashTable.displayTheArray("linear"); // C Option Part B
-        halfFullRandom.displayTheArray("random"); // C Option Part C
-        eightFiveHashRand.displayTheArray("random"); // C Option Part C
+       // halfHashTable.displayTheArray("linear"); // C Option Part A
+      // eightyFiveHashTable.displayTheArray("linear"); // C Option Part B
+       halfFullRandom.displayTheArray("random"); // C Option Part C
+       eightFiveHashRand.displayTheArray("random"); // C Option Part C
     }
     
     public int stringHashFunction(String wordToHash) {
         
         int hashKeyValue = 0;
-        
+        /*
         int secondChar = wordToHash.charAt(1);
         int fifChar = wordToHash.charAt(14);
         int tweChar = wordToHash.charAt(11);
         int thiChar = wordToHash.charAt(12);
         
         hashKeyValue = (secondChar + fifChar + (tweChar * thiChar)) % 128;
+        */
+       
+        for(int j = 0; j < wordToHash.length(); j++){
+            int letter = wordToHash.charAt(j) - 96;
+            hashKeyValue = Math.abs((hashKeyValue * 27 + letter) % 197);
+        }
+        
         return hashKeyValue;
         
     }
